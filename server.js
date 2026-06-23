@@ -25,8 +25,17 @@ const PORT = 5000;
 connectDB();
 
 //middlewares
+// Build allowed origins from defaults and environment variables
+const envOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim())
+  : [];
+const frontendUrl = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.trim()
+  : null;
 const allowedOrigins = [
   "http://localhost:5173",
+  ...envOrigins,
+  frontendUrl,
 ].filter(Boolean);
 
 app.use(
@@ -39,7 +48,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 
@@ -54,10 +63,9 @@ app.use("/api/admin", adminRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/contact", contactRouter);
 
-app.get('/', (req, res) => {
-  res.json({ message: "API is working" })
-})
-
+app.get("/", (req, res) => {
+  res.json({ message: "API is working" });
+});
 
 // Socket.IO setup
 const server = http.createServer(app);
@@ -69,9 +77,7 @@ const io = new Server(server, {
   },
 });
 
-
 io.on("connection", (socket) => {
-
   socket.on("joinChat", (chatId) => {
     socket.join(chatId);
   });
@@ -80,8 +86,7 @@ io.on("connection", (socket) => {
     io.to(data.chatId).emit("receiveMessage", data);
   });
 
-  socket.on("disconnect", () => {
-  });
+  socket.on("disconnect", () => {});
 });
 
 server.listen(PORT, () => {
