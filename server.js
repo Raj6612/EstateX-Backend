@@ -32,8 +32,10 @@ const envOrigins = process.env.ALLOWED_ORIGINS
 const frontendUrl = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.trim()
   : null;
+// include deployed frontend by default to avoid CORS blocking for Vercel deploy
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://estatex-three.vercel.app",
   ...envOrigins,
   frontendUrl,
 ].filter(Boolean);
